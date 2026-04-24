@@ -1,0 +1,198 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <link rel='icon' type='image/svg+xml' href='favicon.svg' />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  
+  <div class="nav">
+    <div class="container inner" style="justify-content:space-between">
+      <a class="logo" href="index.html"><span class="mark"></span>TrackWise</a>
+      <div id="right-controls" style="display:flex;gap:12px;align-items:center">
+        <div style="position:relative">
+          <button id="nav-menu-toggle" class="btn" aria-expanded="false" aria-controls="nav-menu">&#9776;</button>
+          <div id="nav-menu" class="user-dropdown-menu" style="display:none;right:0;left:auto;"></div>
+        </div>
+        <button id="mode-toggle-btn" title="Toggle Dark/Light Mode" class="btn">&#9728;</button>
+        <div id="auth-area" style="display:flex;align-items:center;gap:8px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container section fade-in">
+    <h1>📚 Resources Library</h1>
+    <p class="lead">Curated learning materials and recommended resources for each course.</p>
+
+    <div class="card fade-in" style="margin-top:16px">
+      <h3>Search Resources</h3>
+      <input id="resourceSearch" type="text" class="input" placeholder="Search by course or topic..." oninput="filterResources(this.value)" />
+    </div>
+
+    <div class="card fade-in" style="margin-top:16px">
+      <h3>📖 Recommended Learning Paths</h3>
+      <div id="learningPaths" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:12px;margin-top:12px"></div>
+    </div>
+
+    <div class="card fade-in" style="margin-top:16px">
+      <h3>&#11088; Your Bookmarks</h3>
+      <div id="bookmarks" style="display:grid;gap:10px"></div>
+    </div>
+
+    <div class="card fade-in" style="margin-top:16px">
+      <h3>📚 All Resources</h3>
+      <div id="resourcesList" style="display:grid;gap:12px"></div>
+    </div>
+  </div>
+
+  <div class="footer fade-in" style="margin-top:40px">
+    <div class="container cols">
+      <div>
+        <div class="logo"><span class="mark"></span>TrackWise</div>
+        <p class="muted">We are here to help you learn, track, and grow.</p>
+      </div>
+    </div>
+    <div class="container" style="margin-top:18px;color:#6b7280">&copy; 2025 TrackWise. All rights reserved.</div>
+  </div>
+
+  <div class="modal-backdrop" id="mainModal" onclick="if(event.target.id === 'mainModal') closeModal()">
+    <div class="card modal-content"></div>
+  </div>
+
+  <script src="theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    const resources = [
+      { id: 1, course: 'JavaScript Essentials', title: 'MDN Web Docs - JavaScript', type: 'Documentation', url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript', rating: 5 },
+      { id: 2, course: 'JavaScript Essentials', title: 'JavaScript.info', type: 'Tutorial', url: 'https://javascript.info/', rating: 5 },
+      { id: 3, course: 'React Basics', title: 'React Official Docs', type: 'Documentation', url: 'https://react.dev/', rating: 5 },
+      { id: 4, course: 'React Basics', title: 'Scrimba React Course', type: 'Video Course', url: 'https://scrimba.com/', rating: 4 },
+      { id: 5, course: 'Data Structures', title: 'GeeksforGeeks DSA', type: 'Tutorial', url: 'https://www.geeksforgeeks.org/', rating: 4 },
+      { id: 6, course: 'Database', title: 'SQL Tutorial - W3Schools', type: 'Tutorial', url: 'https://www.w3schools.com/sql/', rating: 4 }
+    ];
+
+    const learningPaths = [
+      { name: 'Frontend Master', courses: ['JavaScript Essentials', 'React Basics', 'CSS Advanced'], icon: '🎨' },
+      { name: 'Backend Developer', courses: ['Database', 'Node.js', 'API Design'], icon: '⚙️' },
+      { name: 'Full Stack', courses: ['JavaScript Essentials', 'React Basics', 'Database', 'Node.js'], icon: '🚀' }
+    ];
+
+    let bookmarks = JSON.parse(localStorage.getItem('trackwiseBookmarks')) || [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      loadCourseData();
+      updateResources();
+    });
+
+    function updateResources() {
+      // Learning Paths
+      const pathsContainer = document.getElementById('learningPaths');
+      pathsContainer.innerHTML = learningPaths.map(path => `
+        <div style="padding:16px;background:linear-gradient(135deg, var(--panel-2) 0%, var(--panel) 100%);border-radius:8px;cursor:pointer;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div style="font-size:32px;margin-bottom:10px">${path.icon}</div>
+          <h4 style="margin:0 0 8px 0">${path.name}</h4>
+          <div style="font-size:12px;color:var(--muted)">
+            ${path.courses.slice(0, 2).join(', ')}${path.courses.length > 2 ? '...' : ''}
+          </div>
+          <button class="btn" onclick="startPath('${path.name}')" style="margin-top:12px;width:100%">Start Path</button>
+        </div>
+      `).join('');
+
+      // Bookmarks
+      const bookmarksContainer = document.getElementById('bookmarks');
+      if (bookmarks.length === 0) {
+        bookmarksContainer.innerHTML = '<p class="muted" style="text-align:center">No bookmarks yet. Add resources to your favorites!</p>';
+      } else {
+        bookmarksContainer.innerHTML = bookmarks.map(res => `
+          <div style="padding:12px;background:var(--panel-2);border-radius:6px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <a href="${res.url}" target="_blank" style="color:var(--brand);text-decoration:none;font-weight:600">${res.title}</a>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px">${res.course} • ${res.type}</div>
+            </div>
+            <button class="btn" onclick="removeBookmark(${res.id})" style="padding:4px 8px">&#11088;</button>
+          </div>
+        `).join('');
+      }
+
+      // All Resources
+      const resourcesContainer = document.getElementById('resourcesList');
+      resourcesContainer.innerHTML = resources.map(res => {
+        const isBookmarked = bookmarks.some(b => b.id === res.id);
+        return `
+          <div style="padding:16px;background:var(--panel-2);border-radius:8px;border-left:3px solid ${res.rating >= 5 ? 'var(--ok)' : 'var(--brand)'}">
+            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
+              <div style="flex:1">
+                <a href="${res.url}" target="_blank" style="color:var(--brand);text-decoration:none;font-weight:600;font-size:14px">${res.title}</a>
+                <div style="font-size:12px;color:var(--muted);margin-top:4px">${res.course}</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:4px">
+                  <span style="background:var(--brand);color:white;padding:2px 6px;border-radius:3px;display:inline-block">${res.type}</span>
+                  <span style="margin-left:8px">${'&#11088;'.repeat(res.rating)}</span>
+                </div>
+              </div>
+              <button class="btn" onclick="toggleBookmark(${res.id}, '${res.title}', '${res.url}', '${res.course}', '${res.type}')" style="padding:8px 12px;background:${isBookmarked ? 'var(--brand)' : 'var(--border)'};color:white">
+                ${isBookmarked ? '&#11088; Saved' : '☆ Save'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleBookmark(id, title, url, course, type) {
+      const index = bookmarks.findIndex(b => b.id === id);
+      if (index > -1) {
+        bookmarks.splice(index, 1);
+      } else {
+        bookmarks.push({ id, title, url, course, type });
+      }
+      localStorage.setItem('trackwiseBookmarks', JSON.stringify(bookmarks));
+      updateResources();
+    }
+
+    function removeBookmark(id) {
+      bookmarks = bookmarks.filter(b => b.id !== id);
+      localStorage.setItem('trackwiseBookmarks', JSON.stringify(bookmarks));
+      updateResources();
+    }
+
+    function filterResources(searchTerm) {
+      const filtered = resources.filter(r => 
+        r.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.course.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      
+      const container = document.getElementById('resourcesList');
+      container.innerHTML = filtered.length === 0 
+        ? '<p class="muted" style="text-align:center">No resources found</p>'
+        : filtered.map(res => {
+            const isBookmarked = bookmarks.some(b => b.id === res.id);
+            return `
+              <div style="padding:16px;background:var(--panel-2);border-radius:8px;border-left:3px solid ${res.rating >= 5 ? 'var(--ok)' : 'var(--brand)'}">
+                <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
+                  <div style="flex:1">
+                    <a href="${res.url}" target="_blank" style="color:var(--brand);text-decoration:none;font-weight:600;font-size:14px">${res.title}</a>
+                    <div style="font-size:12px;color:var(--muted);margin-top:4px">${res.course}</div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:4px">
+                      <span style="background:var(--brand);color:white;padding:2px 6px;border-radius:3px;display:inline-block">${res.type}</span>
+                      <span style="margin-left:8px">${'&#11088;'.repeat(res.rating)}</span>
+                    </div>
+                  </div>
+                  <button class="btn" onclick="toggleBookmark(${res.id}, '${res.title}', '${res.url}', '${res.course}', '${res.type}')" style="padding:8px 12px;background:${isBookmarked ? 'var(--brand)' : 'var(--border)'};color:white">
+                    ${isBookmarked ? '&#11088; Saved' : '☆ Save'}
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
+    }
+
+    function startPath(pathName) {
+      alert(`Starting ${pathName}! This will guide you through the recommended courses in order.`);
+    }
+  </script>
+</body>
+</html>
+

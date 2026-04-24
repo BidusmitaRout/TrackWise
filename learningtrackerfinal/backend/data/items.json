@@ -1,0 +1,206 @@
+[
+  {
+    "id": 1771845380348,
+    "name": "JavaScript Essentials",
+    "progress": 95,
+    "isCompleted": false,
+    "category": "General",
+    "difficulty": "medium",
+    "hoursLogged": 0,
+    "streak": 0,
+    "lastStudied": "2026-02-23T11:16:20.262Z",
+    "deadline": "2026-23-03",
+    "resources": [
+      {
+        "id": 1,
+        "title": "Introduction to JavaScript",
+        "content": "JavaScript is a programming language that conforms to the ECMAScript specification. It is high-level, often just-in-time compiled, and multi-paradigm. It has curly-bracket syntax, dynamic typing, prototype-based object-orientation, and first-class functions.",
+        "completed": true
+      },
+      {
+        "id": 2,
+        "title": "Variables and Data Types",
+        "content": "Variables in JavaScript can be declared using var, let, or const. Data types include primitives like string, number, boolean, null, undefined, and symbol, as well as objects and functions.",
+        "completed": true
+      },
+      {
+        "id": 3,
+        "title": "Functions and Scope",
+        "content": "Functions are first-class citizens in JavaScript. They can be defined using function declarations, expressions, or arrow functions. Scope determines the accessibility of variables.",
+        "completed": true
+      },
+      {
+        "id": 4,
+        "title": "Objects and Arrays",
+        "content": "Objects are collections of key-value pairs. Arrays are special objects with numeric indices. Both are fundamental data structures in JavaScript.",
+        "completed": false
+      },
+      {
+        "id": 5,
+        "title": "Asynchronous Programming",
+        "content": "JavaScript handles asynchronous operations using callbacks, promises, and async/await. This is crucial for non-blocking I/O operations.",
+        "completed": false
+      }
+    ]
+  },
+  {
+    "id": 1771845943864,
+    "owner": "bhumiuppal434@gmail.com",
+    "name": "Data Structures and Algorithms",
+    "progress": 0,
+    "isCompleted": false,
+    "category": "General",
+    "difficulty": "medium",
+    "hoursLogged": 0,
+    "streak": 0,
+    "lastStudied": "2026-02-23T11:25:43.810Z",
+    "deadline": null
+  },
+  {
+    "id": 1776971792207,
+    "name": "JavaScript Essentials",
+    "progress": 100,
+    "isCompleted": true,
+    "category": "General",
+    "difficulty": "medium",
+    "hoursLogged": 0,
+    "streak": 0,
+    "lastStudied": "2026-04-23T19:16:24.499Z",
+    "deadline": "2026-04-26",
+    "notes": [],
+    "timerActive": false,
+    "timerSeconds": 0,
+    "owner": "bhumi@gmail.com",
+    "resources": [
+      {
+        "id": 1,
+        "title": "Introduction to JavaScript",
+        "content": "JavaScript is a programming language that conforms to the ECMAScript specification. It is high-level, often just-in-time compiled, and multi-paradigm. It has curly-bracket syntax, dynamic typing, prototype-based object-orientation, and first-class functions.",
+        "completed": true
+      },
+      {
+        "id": 2,
+        "title": "Variables and Data Types",
+        "content": "Variables in JavaScript can be declared using var, let, or const. Data types include primitives like string, number, boolean, null, undefined, and symbol, as well as objects and functions.",
+        "completed": true
+      },
+      {
+        "id": 3,
+        "title": "Functions and Scope",
+        "content": "Functions are first-class citizens in JavaScript. They can be defined using function declarations, expressions, or arrow functions. Scope determines the accessibility of variables.",
+        "completed": true
+      },
+      {
+        "id": 4,
+        "title": "Objects and Arrays",
+        "content": "Objects are collections of key-value pairs. Arrays are special objects with numeric indices. Both are fundamental data structures in JavaScript.",
+        "completed": true
+      },
+      {
+        "id": 5,
+        "title": "Asynchronous Programming",
+        "content": "JavaScript handles asynchronous operations using callbacks, promises, and async/await. This is crucial for non-blocking I/O operations.",
+        "completed": true
+      }
+    ],
+    "currentResourceIndex": 4
+  },
+  {
+    "id": 1776972947623,
+    "name": "Data Structures and Algorithms",
+    "progress": 100,
+    "isCompleted": true,
+    "category": "General",
+    "difficulty": "medium",
+    "hoursLogged": 0,
+    "streak": 0,
+    "lastStudied": "2026-04-23T19:35:46.231Z",
+    "deadline": null,
+    "notes": [],
+    "timerActive": false,
+    "timerSeconds": 0,
+    "owner": "bhumi@gmail.com",
+    "resources": [
+      {
+        "id": 1,
+        "title": "Page 1: Arrays and Linked Lists",
+        "content": "Learn about arrays and linked lists, including storage structure, indexing, and traversal. Practice writing code to insert, delete, and access elements.",
+        "completed": true
+      },
+      {
+        "id": 2,
+        "title": "Page 2: Stacks and Queues",
+        "content": "Study stack and queue behavior, common operations, and real-world use cases. Implement both using arrays or linked lists.",
+        "completed": true
+      },
+      {
+        "id": 3,
+        "title": "Page 3: Trees and Graphs",
+        "content": "Understand binary trees, traversal algorithms, and the basics of graph representations like adjacency lists and matrices.",
+        "completed": true
+      },
+      {
+        "id": 4,
+        "title": "Page 4: Sorting Algorithms",
+        "content": "Review common sorting algorithms such as bubble sort, merge sort, and quick sort, and learn how to compare their performance.",
+        "completed": true
+      },
+      {
+        "id": 5,
+        "title": "Page 5: Dynamic Programming",
+        "content": "Work through dynamic programming patterns like memoization and tabulation for solving optimization problems.",
+        "completed": true
+      }
+    ],
+    "currentResourceIndex": 4
+  },
+  {
+    "id": 1776975228105,
+    "name": "React Basics",
+    "progress": 100,
+    "isCompleted": true,
+    "category": "General",
+    "difficulty": "medium",
+    "hoursLogged": 0,
+    "streak": 0,
+    "lastStudied": "2026-04-23T20:13:46.322Z",
+    "deadline": null,
+    "notes": [],
+    "timerActive": false,
+    "timerSeconds": 0,
+    "owner": "bhumi@gmail.com",
+    "resources": [
+      {
+        "title": "Page 1: React Components",
+        "content": "Learn how to build components using JSX, props, and composition.",
+        "id": 1,
+        "completed": true
+      },
+      {
+        "title": "Page 2: State and Events",
+        "content": "Manage state in functional components and respond to user interactions.",
+        "id": 2,
+        "completed": true
+      },
+      {
+        "title": "Page 3: Effects and Lifecycle",
+        "content": "Use useEffect and understand when component updates happen.",
+        "id": 3,
+        "completed": true
+      },
+      {
+        "title": "Page 4: Routing and Navigation",
+        "content": "Build multi-page experiences using React routing and navigation patterns.",
+        "id": 4,
+        "completed": true
+      },
+      {
+        "title": "Page 5: Project Practice",
+        "content": "Assemble a small React app using the concepts learned so far.",
+        "id": 5,
+        "completed": true
+      }
+    ],
+    "currentResourceIndex": 4
+  }
+]

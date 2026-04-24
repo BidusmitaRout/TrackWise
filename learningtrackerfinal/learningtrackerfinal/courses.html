@@ -1,0 +1,130 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <link rel='icon' type='image/svg+xml' href='favicon.svg' />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  
+  <div class="nav">
+    <div class="container inner" style="justify-content:space-between">
+      <a class="logo" href="index.html">
+        <span class="mark"></span>
+        TrackWise
+      </a>
+
+      <!-- Right-side controls: hamburger menu, theme toggle, and auth greeting -->
+      <div id="right-controls" style="display:flex;gap:12px;align-items:center">
+        <div style="position:relative">
+          <button id="nav-menu-toggle" class="btn" aria-expanded="false" aria-controls="nav-menu">&#9776;</button>
+          <div id="nav-menu" class="user-dropdown-menu" style="display:none;right:0;left:auto;">
+            <!-- Menu items are populated by script.js -->
+          </div>
+        </div>
+
+        <button id="mode-toggle-btn" title="Toggle Dark/Light Mode" class="btn">&#9728;</button>
+
+        <div id="auth-area" style="display:flex;align-items:center;gap:8px">
+          <!-- Filled dynamically: shows Login/Signup or 'Hi, Name' -->
+        </div>
+      </div>
+    </div>
+  </div>
+<div class="container section fade-in">
+  <h1>Courses</h1>
+  <p class="lead">Pick a course and add it to your tracker.</p>
+
+  <input id="courseSearchInput" class="input" placeholder="Search for courses..." 
+         oninput="suggestCourses(this.value)" style="margin-bottom:12px;"/>
+
+  <div id="courseSuggestions" class="card" style="display:none; padding:10px; margin-bottom:18px;">
+      </div>
+
+  <div class="grid courses">
+    
+    <div class="card fade-in" data-course-id="C01"> 
+      <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80" alt="JavaScript code editor" />
+      <h3>01. Course 1: JavaScript Essentials</h3> 
+      <p class="muted">Learn the fundamentals of JavaScript programming.</p>
+      <button class="btn brand" onclick="addCourseFromCourses('JavaScript Essentials')">Add to Tracker</button>
+    </div>
+    <div class="card fade-in" data-course-id="C02"> 
+      <img src="https://images.unsplash.com/photo-1523475472560-d2df97ec485c?auto=format&fit=crop&w=1200&q=80" alt="Data structures visuals" />
+      <h3>02. Course 2: Data Structures and Algorithms</h3> 
+      <p class="muted">Dive deep into advanced algorithms and data structures.</p>
+      <button class="btn brand" onclick="addCourseFromCourses('Data Structures and Algorithms')">Add to Tracker</button>
+    </div>
+    <div class="card fade-in" data-course-id="C03"> 
+      <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80" alt="React interface mockup" />
+      <h3>03. Course 3: React Basics</h3> 
+      <p class="muted">Build real-world applications with modern tools and frameworks.</p>
+      <button class="btn brand" onclick="addCourseFromCourses('React Basics')">Add to Tracker</button>
+    </div>
+    <div class="card fade-in" data-course-id="C04"> 
+      <img src="https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&w=1200&q=80" alt="Database servers" />
+      <h3>04. Course 4: database management system</h3> 
+      <p class="muted">Focus on niche areas like mobile or backend end</p>
+      <button class="btn brand" onclick="addCourseFromCourses('database management system')">Add to Tracker</button>
+    </div>
+    <div class="card fade-in" data-course-id="C05"> 
+      <img src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=80" alt="Certification preparation material" />
+      <h3>05. Course 5: Certification Prep</h3> 
+      <p class="muted">Prepare for professional certification exams with practice tests.</p>
+      <button class="btn brand" onclick="addCourseFromCourses('Certification Prep')">Add to Tracker</button>
+    </div>
+    <div class="card fade-in" data-course-id="C06"> 
+      <img src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1200&q=80" alt="Study notes and planner" />
+      <h3>06. Course 6: Review</h3> 
+      <p class="muted">Final review and summary of all key topics and modules.</p>
+      <button class="btn brand" onclick="addCourseFromCourses('Review')">Add to Tracker</button>
+    </div>
+  </div>
+</div>
+
+  
+<div class="footer fade-in">
+  <div class="container cols">
+    <div>
+      <div class="logo"><span class="mark"></span>TrackWise</div>
+      <p class="muted">We are here to help you learn, track, and grow.</p>
+    </div>
+    <div>
+      <strong>Courses</strong>
+      <ul class="clean" style="margin-top:8px">
+        <li>JavaScript Essentials</li>
+        <li>Data Structures</li>
+        <li>React Basics</li>
+      </ul>
+    </div>
+    <div>
+      <strong>Resources</strong>
+      <ul class="clean" style="margin-top:8px">
+        <li>Docs</li>
+        <li>Community</li>
+        <li>Support</li>
+      </ul>
+    </div>
+    <div>
+      <strong>About</strong>
+      <ul class="clean" style="margin-top:8px">
+        <li>Company</li>
+        <li>Careers</li>
+        <li>Contact</li>
+      </ul>
+    </div>
+  </div>
+  <div class="container" style="margin-top:18px;color:#6b7280">&copy; 2025 TrackWise. All rights reserved.</div>
+</div>
+
+<div class="modal-backdrop" id="mainModal" onclick="if(event.target.id === 'mainModal') closeModal()">
+  <div class="card modal-content">
+    </div>
+</div>
+
+  <script src="theme.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

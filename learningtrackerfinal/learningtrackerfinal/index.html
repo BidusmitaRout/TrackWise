@@ -1,0 +1,192 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <link rel='icon' type='image/svg+xml' href='favicon.svg' />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  
+  <div class="nav">
+    <div class="container inner" style="justify-content:space-between">
+      <a class="logo" href="index.html">
+        <span class="mark"></span>
+        TrackWise
+      </a>
+      
+      <!-- Right-side controls: hamburger menu, theme toggle, and auth greeting -->
+      <div id="right-controls" style="display:flex;gap:12px;align-items:center">
+        <div style="position:relative">
+          <button id="nav-menu-toggle" class="btn" aria-expanded="false" aria-controls="nav-menu">&#9776;</button>
+          <div id="nav-menu" class="user-dropdown-menu" style="display:none;right:0;left:auto;">
+            <!-- Menu items are populated by script.js -->
+          </div>
+        </div>
+
+        <button id="mode-toggle-btn" title="Toggle Dark/Light Mode" class="btn">&#9728;</button>
+
+        <div id="auth-area" style="display:flex;align-items:center;gap:8px">
+          <!-- Filled dynamically: shows Login/Signup or 'Hi, Name' -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container hero" style="align-items:center;gap:28px">
+    <div class="card slide-left fade-in" style="display:flex;flex-direction:column;gap:14px;max-width:720px">
+      <span class="badge">Track your learning journey</span>
+      <h1 style="font-size:44px;line-height:1.05">Learn better. Track progress. Finish stronger.</h1>
+      <p class="lead">Organize courses, measure study hours, and celebrate achievements — all in one place built for learners who mean business.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <a class="btn brand" href="signup.html">Get Started — It's Free</a>
+        <a class="btn" href="tracker.html">Open Tracker</a>
+        <a class="btn" href="courses.html">Browse Courses</a>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
+        <div style="display:flex;gap:8px;align-items:center"><div class="badge">&#127942;</div><div style="color:var(--muted)">Top learners: <strong>1,200+</strong></div></div>
+        <div style="display:flex;gap:8px;align-items:center"><div class="badge">&#9201;</div><div style="color:var(--muted)">Avg 12h/week</div></div>
+        <div style="display:flex;gap:8px;align-items:center"><div class="badge">&#11088;</div><div style="color:var(--muted)">4.8 ★ average rating</div></div>
+      </div>
+    </div>
+
+    <div style="width:420px;display:flex;justify-content:center;align-items:center">
+      <!-- Lottie animation: replace src with a preferred animation -->
+      <lottie-player src="https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json"  background="transparent"  speed="1"  style="width:380px;height:380px"  loop  autoplay></lottie-player>
+    </div>
+  </div>
+
+  <!-- Animated KPI counters -->
+  <div class="container section fade-in" style="margin-top:18px">
+    <div class="kpi">
+      <div class="tile"><div class="muted">Hours Logged</div><div class="val stat" data-to="12345">0</div></div>
+      <div class="tile"><div class="muted">Active Learners</div><div class="val stat" data-to="1200">0</div></div>
+      <div class="tile"><div class="muted">Achievements</div><div class="val stat" data-to="512">0</div></div>
+      <div class="tile"><div class="muted">Avg Weekly Study</div><div class="val stat" data-to="12" data-suffix="h">0</div></div>
+    </div>
+  </div>
+
+  <!-- Feature strip -->
+  <div class="container section fade-in">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+      <div class="card" style="text-align:center">
+        <div style="font-size:28px">&#9201;</div>
+        <h3 style="margin-top:8px">Track Time</h3>
+        <p class="muted">Log study hours and see weekly trends at a glance.</p>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:28px">&#127942;</div>
+        <h3 style="margin-top:8px">Achievements</h3>
+        <p class="muted">Earn badges and celebrate milestones as you progress.</p>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:28px">&#128202;</div>
+        <h3 style="margin-top:8px">Insights</h3>
+        <p class="muted">Interactive charts to help you optimize study habits.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container section fade-in">
+    <h2>Popular Courses</h2>
+    <div class="grid courses">
+      <div class="card fade-in">
+        <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1200&auto=format&fit=crop" alt="course" />
+        <h3>JavaScript Essentials</h3>
+        <p class="muted">Syntax, DOM, async, and tooling — all in one starter-friendly track.</p>
+      </div>
+      <div class="card fade-in">
+        <img src="https://images.unsplash.com/photo-1555949963-aa79dcee981d?q=80&w=1200&auto=format&fit=crop" alt="course" />
+        <h3>Data Structures with OOP</h3>
+        <p class="muted">Master arrays, stacks, trees, and graphs via real projects.</p>
+      </div>
+      <div class="card fade-in">
+        <img src="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1200&auto=format&fit=crop" alt="course" />
+        <h3>React Basics</h3>
+        <p class="muted">Components, props, hooks, and clean patterns for modern UIs.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container section fade-in">
+    <h2>Pricing Plans</h2>
+    <div class="pricing">
+      <div class="price-card fade-in">
+        <h3>Basic</h3>
+        <div class="price">Rs.499</div>
+        <ul class="clean">
+          <li>Progress tracker</li>
+          <li>3 projects</li>
+          <li>Email support</li>
+        </ul>
+        <a class="btn brand" onclick="handleBuyNow('Basic')">Choose</a>
+      </div>
+      <div class="price-card fade-in">
+        <h3>Standard</h3>
+        <div class="price">Rs.999</div>
+        <ul class="clean">
+          <li>Everything in Basic</li>
+          <li>Unlimited projects</li>
+          <li>Weekly insights</li>
+        </ul>
+        <a class="btn brand" onclick="handleBuyNow('Standard')">Choose</a>
+      </div>
+      <div class="price-card fade-in">
+        <h3>Premium</h3>
+        <div class="price">Rs.1499</div>
+        <ul class="clean">
+          <li>1:1 mentor feedback</li>
+          <li>Priority support</li>
+          <li>Certificates</li>
+        </ul>
+        <a class="btn brand" onclick="handleBuyNow('Premium')">Choose</a>
+      </div>
+    </div>
+  </div>
+
+  
+<div class="footer fade-in">
+  <div class="container cols">
+    <div>
+      <div class="logo"><span class="mark"></span>TrackWise</div>
+      <p class="muted">We are here to help you learn, track, and grow.</p>
+    </div>
+    <div>
+      <strong>Courses</strong>
+      <ul class="clean" style="margin-top:8px">
+        <li>JavaScript Essentials</li>
+        <li>Data Structures</li>
+        <li>React Basics</li>
+      </ul>
+    </div>
+    <div>
+      <strong>Resources</strong>
+      <ul class="clean" style="margin-top:8px">
+        <li>Docs</li>
+        <li>Community</li>
+        <li>Support</li>
+      </ul>
+    </div>
+    <div>
+      <strong>About</strong>
+      <ul class="clean" style="margin-top:8px">
+        <li>Company</li>
+        <li>Careers</li>
+        <li>Contact</li>
+      </ul>
+    </div>
+  </div>
+  <div class="container" style="margin-top:18px;color:#6b7280">&copy; 2025 TrackWise. All rights reserved.</div>
+</div>
+
+<div class="modal-backdrop" id="mainModal" onclick="if(event.target.id === 'mainModal') closeModal()">
+  <div class="card modal-content">
+    </div>
+</div>
+
+  <script src="theme.js"></script>
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+[
+  {
+    "email": "bhumi@gmail.com",
+    "name": "Bhumi",
+    "password": "hashedpassword",  // Note: In a real app, passwords should be hashed
+    "createdAt": "2026-04-24T00:00:00.000Z"
+  },
+  {
+    "email": "bhumiuppal434@gmail.com",
+    "name": "Bhumi Uppal",
+    "password": "hashedpassword",
+    "createdAt": "2026-04-24T00:00:00.000Z"
+  }
+]

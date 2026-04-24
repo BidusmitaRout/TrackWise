@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1771845380349,
+    "owner": "bhumi@gmail.com",
+    "title": "First Course Completed",
+    "description": "Completed your first learning course",
+    "dateEarned": "2026-04-24T00:00:00.000Z",
+    "category": "Completion"
+  },
+  {
+    "id": 1771845943865,
+    "owner": "bhumiuppal434@gmail.com",
+    "title": "Streak Master",
+    "description": "Maintained a 7-day study streak",
+    "dateEarned": "2026-04-24T00:00:00.000Z",
+    "category": "Streak"
+  }
+]
