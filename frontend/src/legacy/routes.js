@@ -3,7 +3,6 @@ import analyticsHtml from './pages/analytics.html?raw';
 import contactHtml from './pages/contact.html?raw';
 import coursesHtml from './pages/courses.html?raw';
 import forumsHtml from './pages/forums.html?raw';
-import indexHtml from './pages/index.html?raw';
 import leaderboardHtml from './pages/leaderboard.html?raw';
 import loginHtml from './pages/login.html?raw';
 import paymentHtml from './pages/payment.html?raw';
@@ -15,7 +14,6 @@ import signupHtml from './pages/signup.html?raw';
 import trackerHtml from './pages/tracker.html?raw';
 
 export const legacyRoutes = [
-  { path: '/', html: indexHtml, title: 'TrackWise — Learn. Track. Grow.' },
   { path: '/achievements', html: achievementsHtml, title: 'Achievements — TrackWise' },
   { path: '/analytics', html: analyticsHtml, title: 'Analytics — TrackWise' },
   { path: '/contact', html: contactHtml, title: 'Contact — TrackWise' },

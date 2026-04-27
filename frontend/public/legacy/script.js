@@ -182,23 +182,41 @@ function autoPopulateCourseFromSelection() {
 }
 
 /* --- AUTH HELPERS --- */
+const TOKEN_KEY = 'trackWiseAuthToken';
 const getUsers = () => JSON.parse(localStorage.getItem('trackwise_users') || '[]');
 const saveUsers = (u) => localStorage.setItem('trackwise_users', JSON.stringify(u));
+const getAuthToken = () => localStorage.getItem(TOKEN_KEY);
+const setAuthToken = (token) => localStorage.setItem(TOKEN_KEY, token);
+const clearAuthToken = () => localStorage.removeItem(TOKEN_KEY);
 const getAuthUser = () => JSON.parse(localStorage.getItem(AUTH_KEY) || 'null');
 const setAuthUser = (user) => localStorage.setItem(AUTH_KEY, JSON.stringify(user));
-const clearAuthUser = () => localStorage.removeItem(AUTH_KEY);
+const clearAuthUser = () => {
+    localStorage.removeItem(AUTH_KEY);
+    clearAuthToken();
+};
 const isAuthenticated = () => !!getAuthUser();
 
+const getAuthHeaders = () => {
+    const token = getAuthToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+const getJsonHeaders = () => ({
+    'Content-Type': 'application/json'
+});
+
 async function apiGetUsers() {
-    const res = await fetch(`${API_BASE}/users`);
+    const res = await fetch(`${API_BASE}/users`, {
+        headers: getAuthHeaders(),
+    });
     if (!res.ok) throw new Error('Could not fetch users');
     return res.json();
 }
 
 async function apiCreateUser(userPayload) {
-    const res = await fetch(`${API_BASE}/users`, {
+    const res = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getJsonHeaders(),
         body: JSON.stringify(userPayload)
     });
     if (!res.ok) {
@@ -209,10 +227,26 @@ async function apiCreateUser(userPayload) {
     return res.json();
 }
 
+async function apiLogin(credentials) {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: getJsonHeaders(),
+        body: JSON.stringify(credentials)
+    });
+    if (!res.ok) {
+        const err = new Error('Could not login');
+        err.status = res.status;
+        throw err;
+    }
+    return res.json();
+}
+
 async function apiListItems() {
     const user = getAuthUser();
     if (!user || !user.email) throw new Error('Not authenticated');
-    const res = await fetch(`${API_BASE}/items?user=${encodeURIComponent(user.email)}`);
+    const res = await fetch(`${API_BASE}/items?user=${encodeURIComponent(user.email)}`, {
+        headers: getAuthHeaders(),
+    });
     if (!res.ok) throw new Error('Could not fetch items');
     return res.json();
 }
@@ -222,7 +256,7 @@ async function apiCreateItem(itemPayload) {
     if (!user || !user.email) throw new Error('Not authenticated');
     const res = await fetch(`${API_BASE}/items`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...getJsonHeaders(), ...getAuthHeaders() },
         body: JSON.stringify({ ...itemPayload, owner: user.email })
     });
     if (!res.ok) throw new Error('Could not create item');
@@ -234,7 +268,7 @@ async function apiUpdateItem(id, itemPayload) {
     if (!user || !user.email) throw new Error('Not authenticated');
     const res = await fetch(`${API_BASE}/items/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...getJsonHeaders(), ...getAuthHeaders() },
         body: JSON.stringify({ ...itemPayload, owner: user.email })
     });
     if (!res.ok) throw new Error('Could not update item');
@@ -245,7 +279,8 @@ async function apiDeleteItem(id) {
     const user = getAuthUser();
     if (!user || !user.email) throw new Error('Not authenticated');
     const res = await fetch(`${API_BASE}/items/${id}?user=${encodeURIComponent(user.email)}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAuthHeaders(),
     });
     if (!res.ok) throw new Error('Could not delete item');
     return res.json();
@@ -363,31 +398,45 @@ async function loginSubmit(event) {
     }
 
     const localUsers = getUsers();
-    let user = localUsers.find(u => u.email.toLowerCase() === email && u.password === password);
-    if (!user) {
-        try {
-            const remoteUsers = await apiGetUsers();
-            user = (Array.isArray(remoteUsers) ? remoteUsers : []).find(
-                (u) => String(u.email || '').toLowerCase() === email && u.password === password
-            );
-            // Keep local cache synced for smoother offline/refresh experience.
-            if (user && !localUsers.find((u) => String(u.email || '').toLowerCase() === email)) {
-                saveUsers([...localUsers, user]);
+    let user = null;
+    let remoteAuthSucceeded = false;
+
+    try {
+        const response = await apiLogin({ email, password });
+        if (response && response.user) {
+            user = response.user;
+            setAuthUser(user);
+            if (response.token) {
+                setAuthToken(response.token);
+                remoteAuthSucceeded = true;
             }
-        } catch (e) {
-            // Backend may be down; continue using local-only auth fallback.
+            if (!localUsers.find((u) => String(u.email || '').toLowerCase() === email)) {
+                saveUsers([...localUsers, { email, name: user.name, password }]);
+            }
+        }
+    } catch (e) {
+        // Backend may be unavailable; fallback to local-only auth.
+    }
+
+    if (!user) {
+        user = localUsers.find((u) => String(u.email || '').toLowerCase() === email && u.password === password);
+        if (user) {
+            clearAuthToken();
         }
     }
+
     if (!user) {
         alert('Invalid credentials. If you are new, please sign up.');
         return;
     }
-    setAuthUser({ email: user.email, name: user.name, phone: user.phone, password: user.password });
-    
-    // Show success message
+
+    setAuthUser({ email: user.email, name: user.name, phone: user.phone });
+    if (!remoteAuthSucceeded) {
+        clearAuthToken();
+    }
+
     alert(`Welcome back ${user.name}! You are now logged in.`);
     
-    // Redirect to `next` if present
     const params = new URLSearchParams(window.location.search);
     const next = params.get('next');
     if (next) {
@@ -413,7 +462,6 @@ async function signupSubmit(event) {
         return;
     }
 
-    // Validate phone number (10 digits)
     if (!/^\d{10}$/.test(phone)) {
         alert('Please enter a valid 10-digit phone number.');
         return;
@@ -428,8 +476,16 @@ async function signupSubmit(event) {
 
     const newUser = { name, email, phone, password };
 
+    let remoteSignupSucceeded = false;
     try {
-        await apiCreateUser(newUser);
+        const response = await apiCreateUser(newUser);
+        if (response && response.user) {
+            setAuthUser(response.user);
+            if (response.token) {
+                setAuthToken(response.token);
+                remoteSignupSucceeded = true;
+            }
+        }
     } catch (e) {
         if (e && e.status === 409) {
             alert('An account with this email already exists. Please login instead.');
@@ -441,12 +497,13 @@ async function signupSubmit(event) {
 
     users.push(newUser);
     saveUsers(users);
-    setAuthUser(newUser);
+    setAuthUser({ email, name, phone });
+    if (!remoteSignupSucceeded) {
+        clearAuthToken();
+    }
     
-    // Show success message
     alert(`Welcome ${name}! Account created successfully. You are now logged in.`);
     
-    // Redirect to next if present, otherwise home
     const params = new URLSearchParams(window.location.search);
     const next = params.get('next');
     if (next) {
