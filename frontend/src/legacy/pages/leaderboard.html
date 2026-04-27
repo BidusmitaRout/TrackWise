@@ -76,8 +76,8 @@
       { name: 'Vikram Reddy', streak: 22, hours: 75, completed: 4 }
     ];
 
-    document.addEventListener('DOMContentLoaded', function() {
-      loadCourseData();
+    document.addEventListener('DOMContentLoaded', async function() {
+      await loadCourseData();
       updateLeaderboards();
     });
 

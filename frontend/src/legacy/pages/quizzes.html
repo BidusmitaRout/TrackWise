@@ -68,12 +68,27 @@
       { id: 3, course: 'Data Structures', questions: 12, difficulty: 'hard', attempts: 3, bestScore: 80 }
     ];
 
-    let quizResults = JSON.parse(localStorage.getItem('trackwiseQuizResults')) || [];
+    let quizResults = [];
 
-    document.addEventListener('DOMContentLoaded', function() {
-      loadCourseData();
+    document.addEventListener('DOMContentLoaded', async function() {
+      await loadCourseData();
+      await loadQuizResults();
       updateQuizzes();
     });
+
+    async function loadQuizResults() {
+      quizResults = JSON.parse(localStorage.getItem('trackwiseQuizResults')) || [];
+      try {
+        const backendResults = await apiGetCollection('quizzes', { user: getAuthUser()?.email });
+        if (Array.isArray(backendResults)) {
+          quizResults = backendResults;
+          localStorage.setItem('trackwiseQuizResults', JSON.stringify(quizResults));
+        }
+      } catch (e) {
+        // fallback to local storage
+      }
+      return quizResults;
+    }
 
     function updateQuizzes() {
       const bestScore = quizResults.length ? Math.max(...quizResults.map(r => r.score)) : 0;
@@ -167,14 +182,26 @@
       document.getElementById('mainModal').classList.add('show-modal');
     }
 
-    function saveQuizResult(courseName, score, correct, total) {
-      quizResults.push({
+    async function saveQuizResult(courseName, score, correct, total) {
+      const result = {
         course: courseName,
         score: score,
         correct: correct,
         total: total,
         date: new Date().toLocaleDateString()
-      });
+      };
+
+      try {
+        const saved = await apiCreateCollectionItem('quizzes', result);
+        if (saved && saved.id) {
+          quizResults.push(saved);
+        } else {
+          quizResults.push(result);
+        }
+      } catch (e) {
+        quizResults.push(result);
+      }
+
       localStorage.setItem('trackwiseQuizResults', JSON.stringify(quizResults));
       updateQuizzes();
     }

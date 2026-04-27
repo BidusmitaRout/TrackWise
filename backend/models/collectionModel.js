@@ -2,8 +2,8 @@ const fs = require('fs');
 const path = require('path');
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
-const COLLECTIONS = ['items', 'users', 'achievements', 'progress', 'schedules', 'notes', 'timers'];
-const OWNER_SCOPED = new Set(['items', 'achievements', 'progress', 'schedules', 'notes', 'timers']);
+const COLLECTIONS = ['items', 'users', 'achievements', 'progress', 'schedules', 'notes', 'timers', 'forums', 'quizzes'];
+const OWNER_SCOPED = new Set(['items', 'achievements', 'progress', 'schedules', 'notes', 'timers', 'forums', 'quizzes']);
 const EMAIL_KEYED = new Set(['users']);
 const COLLECTION_FILES = {
   items: path.join(DATA_DIR, 'items.json'),
@@ -12,7 +12,9 @@ const COLLECTION_FILES = {
   progress: path.join(DATA_DIR, 'progress.json'),
   schedules: path.join(DATA_DIR, 'schedules.json'),
   notes: path.join(DATA_DIR, 'notes.json'),
-  timers: path.join(DATA_DIR, 'timers.json')
+  timers: path.join(DATA_DIR, 'timers.json'),
+  forums: path.join(DATA_DIR, 'forums.json'),
+  quizzes: path.join(DATA_DIR, 'quizzes.json')
 };
 
 function ensureDataDir() {

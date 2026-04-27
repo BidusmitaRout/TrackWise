@@ -78,10 +78,23 @@
       localStorage.setItem('trackwiseDiscussions', JSON.stringify(discussions));
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-      loadCourseData();
+    document.addEventListener('DOMContentLoaded', async function() {
+      await loadCourseData();
+      await loadForums();
       updateForums();
     });
+
+    async function loadForums() {
+      try {
+        const backendDiscussions = await apiGetCollection('forums', { user: getAuthUser()?.email });
+        if (Array.isArray(backendDiscussions) && backendDiscussions.length > 0) {
+          discussions = backendDiscussions;
+          localStorage.setItem('trackwiseDiscussions', JSON.stringify(discussions));
+        }
+      } catch (e) {
+        // fallback to localStorage
+      }
+    }
 
     function updateForums() {
       const coursesContainer = document.getElementById('coursesList');
@@ -189,7 +202,7 @@
       alert('Reply functionality coming soon! You can already post new discussions.');
     }
 
-    function postDiscussion() {
+    async function postDiscussion() {
       const title = document.getElementById('newThreadTitle').value.trim();
       const body = document.getElementById('newThreadBody').value.trim();
       const user = getAuthUser();
@@ -205,17 +218,26 @@
       }
 
       const newDisc = {
-        id: Math.max(...discussions.map(d => d.id), 0) + 1,
         course: currentCourse,
         title: title,
         author: user ? user.name : 'Anonymous',
         replies: 0,
         views: 1,
-        date: 'just now',
+        date: new Date().toLocaleString(),
         solved: false
       };
 
-      discussions.unshift(newDisc);
+      try {
+        const saved = await apiCreateCollectionItem('forums', newDisc);
+        if (saved && saved.id) {
+          discussions.unshift(saved);
+        } else {
+          discussions.unshift({ id: Math.max(...discussions.map(d => d.id), 0) + 1, ...newDisc });
+        }
+      } catch (e) {
+        discussions.unshift({ id: Math.max(...discussions.map(d => d.id), 0) + 1, ...newDisc });
+      }
+
       localStorage.setItem('trackwiseDiscussions', JSON.stringify(discussions));
       
       document.getElementById('newThreadTitle').value = '';

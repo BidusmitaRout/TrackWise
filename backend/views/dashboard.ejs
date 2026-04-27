@@ -1,0 +1,7 @@
+<% layout('layout', { title: 'Dashboard' }) %>
+<h1>Dashboard</h1>
+<div class="meta">Welcome back, <strong><%= user.name || user.email %></strong></div>
+<p>This is your session-based dashboard, rendered with EJS on the backend.</p>
+<form action="/logout" method="post">
+  <button type="submit">Logout</button>
+</form>

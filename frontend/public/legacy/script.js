@@ -205,6 +205,11 @@ const getJsonHeaders = () => ({
     'Content-Type': 'application/json'
 });
 
+const buildQuery = (params = {}) => {
+    const keys = Object.keys(params).filter((key) => params[key] !== undefined && params[key] !== null && params[key] !== '');
+    return keys.length ? `?${keys.map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`).join('&')}` : '';
+};
+
 async function apiGetUsers() {
     const res = await fetch(`${API_BASE}/users`, {
         headers: getAuthHeaders(),
@@ -241,14 +246,59 @@ async function apiLogin(credentials) {
     return res.json();
 }
 
+async function apiGetCollection(collection, query = {}) {
+    const queryString = buildQuery(query);
+    const res = await fetch(`${API_BASE}/${collection}${queryString}`, {
+        headers: getAuthHeaders(),
+    });
+    if (!res.ok) throw new Error(`Could not fetch ${collection}`);
+    return res.json();
+}
+
+async function apiCreateCollectionItem(collection, payload) {
+    const res = await fetch(`${API_BASE}/${collection}`, {
+        method: 'POST',
+        headers: {
+            ...getJsonHeaders(),
+            ...getAuthHeaders(),
+        },
+        body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+        const err = new Error(`Could not create ${collection}`);
+        err.status = res.status;
+        throw err;
+    }
+    return res.json();
+}
+
+async function apiUpdateCollectionItem(collection, id, payload) {
+    const res = await fetch(`${API_BASE}/${collection}/${id}`, {
+        method: 'PUT',
+        headers: {
+            ...getJsonHeaders(),
+            ...getAuthHeaders(),
+        },
+        body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(`Could not update ${collection}`);
+    return res.json();
+}
+
+async function apiDeleteCollectionItem(collection, id, query = {}) {
+    const queryString = buildQuery(query);
+    const res = await fetch(`${API_BASE}/${collection}/${id}${queryString}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+    });
+    if (!res.ok) throw new Error(`Could not delete ${collection}`);
+    return res.json();
+}
+
 async function apiListItems() {
     const user = getAuthUser();
     if (!user || !user.email) throw new Error('Not authenticated');
-    const res = await fetch(`${API_BASE}/items?user=${encodeURIComponent(user.email)}`, {
-        headers: getAuthHeaders(),
-    });
-    if (!res.ok) throw new Error('Could not fetch items');
-    return res.json();
+    return apiGetCollection('items', { user: user.email });
 }
 
 async function apiCreateItem(itemPayload) {
@@ -766,8 +816,21 @@ async function initializeTrackerPage() {
 // Lightweight loader used by pages (like analytics.html) that only need the data
 // but do not want to render the full tracker table. Keeps backwards compatibility
 // with older pages that call `loadCourseData()`.
-function loadCourseData() {
+async function loadCourseData() {
     courseData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    try {
+        const user = getAuthUser();
+        if (user && user.email) {
+            const items = await apiListItems();
+            if (Array.isArray(items)) {
+                courseData = items;
+                saveTracker();
+            }
+        }
+    } catch (e) {
+        // keep local data if backend is unavailable or auth is missing
+    }
+    return courseData;
 }
 
 async function addCourseRow() {

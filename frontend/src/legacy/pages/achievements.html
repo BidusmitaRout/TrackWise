@@ -81,10 +81,43 @@
 
     let earnedBadges = JSON.parse(localStorage.getItem('trackwiseEarnedBadges') || '[]');
 
-    document.addEventListener('DOMContentLoaded', function() {
-      loadCourseData();
+    document.addEventListener('DOMContentLoaded', async function() {
+      await loadCourseData();
+      await loadEarnedBadges();
       updateAchievements();
     });
+
+    async function loadEarnedBadges() {
+      try {
+        const user = getAuthUser();
+        if (user && user.email) {
+          const backendBadges = await apiGetCollection('achievements', { user: user.email });
+          if (Array.isArray(backendBadges)) {
+            earnedBadges = backendBadges;
+            localStorage.setItem('trackwiseEarnedBadges', JSON.stringify(earnedBadges));
+          }
+        }
+      } catch (e) {
+        // fallback to local storage
+      }
+      return earnedBadges;
+    }
+
+    async function saveAchievement(badge) {
+      try {
+        const user = getAuthUser();
+        if (!user || !user.email) return;
+        await apiCreateCollectionItem('achievements', {
+          id: badge.id,
+          name: badge.name,
+          description: badge.description,
+          points: badge.points,
+          icon: badge.icon
+        });
+      } catch (e) {
+        // ignore backend persistence failures
+      }
+    }
 
     function updateAchievements() {
       // Check for new badges
@@ -93,6 +126,7 @@
           earnedBadges.push(badge);
           showBadgeNotification(badge);
           localStorage.setItem('trackwiseEarnedBadges', JSON.stringify(earnedBadges));
+          saveAchievement(badge);
         }
       });
 
