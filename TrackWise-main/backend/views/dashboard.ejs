@@ -1,43 +1,111 @@
-<h1>
-    Dashboard</h1>
-<div class="meta">Welcome back, <strong><%= user.name || user.email %></strong></div>
+<h1>Dashboard</h1>
+
+<div class="meta">
+  Welcome back, <strong><%= user.name || user.email %></strong>
+</div>
+
 <p>This is your session-based dashboard, rendered with EJS on the backend.</p>
 
 <hr>
 
 <h3>Your Learning Tracks</h3>
 <div class="courses-container">
-    <% if (typeof courses !== 'undefined' && courses.length > 0) { %>
-        <% courses.forEach(course => { %>
-            <div class="course-card" style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 8px;">
-                <h4>
-                    <%= course.name %>
-                </h4>
-                <p>Progress: <strong><%= course.progress %>%</strong></p>
+  <% if (typeof courses !== 'undefined' && courses.length > 0) { %>
+    <% courses.forEach(course => { %>
+      <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 8px;">
+        <h4><%= course.name %></h4>
+        <p>Progress: <strong><%= course.progress %>%</strong></p>
 
-                <% if (course.resources && course.resources.length > 0) { %>
-                    <ul>
-                        <% course.resources.forEach(resource => { %>
-                            <li>
-                                <%= resource.title %>
-                                    <% if (resource.pdfPath) { %>
-                                        <a href="<%= resource.pdfPath %>" target="_blank" style="color: #007bff; margin-left: 10px;">
-                                        [View PDF]
-                                    </a>
-                                        <% } %>
-                            </li>
-                            <% }) %>
-                    </ul>
-                    <% } %>
-            </div>
+        <% if (course.resources && course.resources.length > 0) { %>
+          <ul>
+            <% course.resources.forEach(resource => { %>
+              <li>
+                <%= resource.title %>
+                <% if (resource.pdfPath) { %>
+                  <a href="<%= resource.pdfPath %>" target="_blank" style="color: blue; margin-left: 10px;">
+                    [View PDF]
+                  </a>
+                <% } %>
+              </li>
             <% }) %>
-                <% } else { %>
-                    <p>No courses found. Start learning today!</p>
-                    <% } %>
+          </ul>
+        <% } %>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p>No courses found. Start learning today!</p>
+  <% } %>
 </div>
 
 <hr>
 
-<form action="/logout" method="post">
-    <button type="submit">Logout</button>
+<!-- 🔥 ADD NOTE SECTION -->
+<h3>Add Note</h3>
+
+<form id="noteForm">
+  <input type="text" id="text" placeholder="Enter note" required />
+  <input type="date" id="date" required />
+  <button type="submit">Add Note</button>
 </form>
+
+<hr>
+
+<!-- 🔥 SHOW NOTES -->
+<h3>Your Notes</h3>
+<ul id="notesList"></ul>
+
+<hr>
+
+<form action="/logout" method="post">
+  <button type="submit">Logout</button>
+</form>
+
+<!-- 🔥 SCRIPT -->
+<script>
+  const token = localStorage.getItem("token");
+
+  // ✅ ADD NOTE
+  document.getElementById("noteForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const text = document.getElementById("text").value;
+    const date = document.getElementById("date").value;
+
+    const res = await fetch("/api/notes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ text, date })
+    });
+
+    const data = await res.json();
+    alert("Note added!");
+
+    loadNotes(); // refresh list
+  });
+
+  // ✅ LOAD NOTES
+  async function loadNotes() {
+    const res = await fetch("/api/notes", {
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const notes = await res.json();
+
+    const list = document.getElementById("notesList");
+    list.innerHTML = "";
+
+    notes.forEach(note => {
+      const li = document.createElement("li");
+      li.textContent = note.text + " (" + note.date + ")";
+      list.appendChild(li);
+    });
+  }
+
+  // initial load
+  loadNotes();
+</script>
