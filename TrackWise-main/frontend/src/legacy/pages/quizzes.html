@@ -1,0 +1,211 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <link rel='icon' type='image/svg+xml' href='favicon.svg' />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  
+  <div class="nav">
+    <div class="container inner" style="justify-content:space-between">
+      <a class="logo" href="index.html"><span class="mark"></span>TrackWise</a>
+      <div id="right-controls" style="display:flex;gap:12px;align-items:center">
+        <div style="position:relative">
+          <button id="nav-menu-toggle" class="btn" aria-expanded="false" aria-controls="nav-menu">&#9776;</button>
+          <div id="nav-menu" class="user-dropdown-menu" style="display:none;right:0;left:auto;"></div>
+        </div>
+        <button id="mode-toggle-btn" title="Toggle Dark/Light Mode" class="btn">&#9728;</button>
+        <div id="auth-area" style="display:flex;align-items:center;gap:8px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container section fade-in">
+    <h1>✍️ Quizzes & Assessments</h1>
+    <p class="lead">Test your knowledge and track improvement.</p>
+
+    <div class="kpi">
+      <div class="tile fade-in"><div class="muted">Quizzes Taken</div><div class="val" id="quizzesTaken">0</div></div>
+      <div class="tile fade-in"><div class="muted">Avg Score</div><div class="val" id="avgScore">--</div></div>
+      <div class="tile fade-in"><div class="muted">Best Score</div><div class="val" id="bestScore">--</div></div>
+      <div class="tile fade-in"><div class="muted">Certification Ready</div><div class="val" id="certReady">0</div></div>
+    </div>
+
+    <div class="card fade-in" style="margin-top:16px">
+      <h3>Available Quizzes</h3>
+      <div id="quizzesList" style="display:grid;gap:12px;margin-top:12px"></div>
+    </div>
+
+    <div class="card fade-in" style="margin-top:16px">
+      <h3>Quiz Results</h3>
+      <div id="resultsHistory" style="display:grid;gap:10px"></div>
+    </div>
+  </div>
+
+  <div class="footer fade-in" style="margin-top:40px">
+    <div class="container cols">
+      <div>
+        <div class="logo"><span class="mark"></span>TrackWise</div>
+        <p class="muted">We are here to help you learn, track, and grow.</p>
+      </div>
+    </div>
+    <div class="container" style="margin-top:18px;color:#6b7280">&copy; 2025 TrackWise. All rights reserved.</div>
+  </div>
+
+  <div class="modal-backdrop" id="mainModal" onclick="if(event.target.id === 'mainModal') closeModal()">
+    <div class="card modal-content" style="max-width:600px"></div>
+  </div>
+
+  <script src="theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    const quizzes = [
+      { id: 1, course: 'JavaScript Essentials', questions: 10, difficulty: 'medium', attempts: 2, bestScore: 85 },
+      { id: 2, course: 'React Basics', questions: 15, difficulty: 'hard', attempts: 1, bestScore: 72 },
+      { id: 3, course: 'Data Structures', questions: 12, difficulty: 'hard', attempts: 3, bestScore: 80 }
+    ];
+
+    let quizResults = [];
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      await loadCourseData();
+      await loadQuizResults();
+      updateQuizzes();
+    });
+
+    async function loadQuizResults() {
+      quizResults = JSON.parse(localStorage.getItem('trackwiseQuizResults')) || [];
+      try {
+        const backendResults = await apiGetCollection('quizzes', { user: getAuthUser()?.email });
+        if (Array.isArray(backendResults)) {
+          quizResults = backendResults;
+          localStorage.setItem('trackwiseQuizResults', JSON.stringify(quizResults));
+        }
+      } catch (e) {
+        // fallback to local storage
+      }
+      return quizResults;
+    }
+
+    function updateQuizzes() {
+      const bestScore = quizResults.length ? Math.max(...quizResults.map(r => r.score)) : 0;
+      const avgScore = quizResults.length ? Math.round(quizResults.reduce((sum, r) => sum + r.score, 0) / quizResults.length) : 0;
+      const certReady = courseData.filter(c => c.progress >= 80).length;
+
+      document.getElementById('quizzesTaken').textContent = quizResults.length;
+      document.getElementById('avgScore').textContent = avgScore > 0 ? avgScore + '%' : '--';
+      document.getElementById('bestScore').textContent = bestScore > 0 ? bestScore + '%' : '--';
+      document.getElementById('certReady').textContent = certReady;
+
+      // Available quizzes
+      const quizzesContainer = document.getElementById('quizzesList');
+      quizzesContainer.innerHTML = courseData.map(course => {
+        const quiz = quizzes.find(q => q.course === course.name);
+        const completionPercent = course.progress;
+        const isReady = completionPercent >= 70;
+        
+        return `
+          <div style="padding:16px;background:var(--panel-2);border-radius:8px;border-left:3px solid ${isReady ? 'var(--brand)' : 'var(--muted)'}">
+            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
+              <div>
+                <h4 style="margin:0">${course.name}</h4>
+                <div style="font-size:12px;color:var(--muted);margin-top:4px">${quiz ? quiz.questions + ' questions • ' + quiz.difficulty : 'No quiz available'}</div>
+              </div>
+              ${isReady ? `<div style="background:var(--brand);color:white;padding:4px 12px;border-radius:4px;font-size:12px">Ready</div>` : `<div style="background:var(--muted);color:white;padding:4px 12px;border-radius:4px;font-size:12px">Complete ${Math.round(100 - completionPercent)}% more</div>`}
+            </div>
+            <div style="width:100%;height:4px;background:var(--border);border-radius:2px;margin-bottom:10px;overflow:hidden">
+              <div style="height:100%;width:${completionPercent}%;background:var(--brand)"></div>
+            </div>
+            <button class="btn brand" onclick="startQuiz('${course.name}')" ${!isReady ? 'disabled' : ''} style="${!isReady ? 'opacity:0.5;cursor:not-allowed' : ''}">
+              ${quiz ? 'Take Quiz' : 'Coming Soon'}
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      // Results history
+      const resultsContainer = document.getElementById('resultsHistory');
+      if (quizResults.length === 0) {
+        resultsContainer.innerHTML = '<p class="muted" style="text-align:center">No quiz attempts yet. Start practicing!</p>';
+      } else {
+        resultsContainer.innerHTML = quizResults.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10).map(result => `
+          <div style="padding:12px;background:var(--panel-2);border-radius:6px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-weight:600">${result.course}</div>
+              <div style="font-size:12px;color:var(--muted)">${result.date}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:20px;font-weight:bold;color:${result.score >= 80 ? 'var(--ok)' : result.score >= 60 ? 'var(--warn)' : '#ef4444'}">${result.score}%</div>
+              <div style="font-size:12px;color:var(--muted)">${result.correct}/${result.total} correct</div>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function startQuiz(courseName) {
+      const quiz = quizzes.find(q => q.course === courseName);
+      if (!quiz) return;
+
+      const modalContent = document.querySelector('#mainModal .modal-content');
+      const score = Math.round(Math.random() * 40 + 60); // Random score 60-100
+      const correct = Math.round(score * quiz.questions / 100);
+
+      modalContent.innerHTML = `
+        <h2 style="margin-top:0">Quiz: ${courseName}</h2>
+        <p style="color:var(--muted)">${quiz.questions} questions • ${quiz.difficulty}</p>
+        
+        <div style="padding:20px;background:var(--panel-2);border-radius:8px;text-align:center;margin:20px 0">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Your Score</div>
+          <div style="font-size:48px;font-weight:bold;color:var(--brand)">${score}%</div>
+          <div style="font-size:14px;color:var(--muted);margin-top:10px">${correct}/${quiz.questions} correct</div>
+        </div>
+
+        <div style="padding:12px;background:${score >= 80 ? 'rgba(16, 185, 129, 0.1)' : score >= 60 ? 'rgba(245, 158, 11, 0.1)' : 'rgba(239, 68, 68, 0.1)'};border-radius:8px;margin-bottom:20px">
+          <div style="font-weight:600;color:${score >= 80 ? 'var(--ok)' : score >= 60 ? 'var(--warn)' : '#ef4444'}">
+            ${score >= 80 ? '✅ Great job!' : score >= 60 ? '⚠️ Good effort' : '❌ Try again'}
+          </div>
+          <div style="font-size:12px;margin-top:8px">
+            ${score >= 80 ? 'You passed! Save this score or retake to improve.' : 'Review the material and try again.'}
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <button class="btn" onclick="closeModal()">Close</button>
+          <button class="btn brand" onclick="saveQuizResult('${courseName}', ${score}, ${correct}, ${quiz.questions}); closeModal()">Save Score</button>
+        </div>
+      `;
+
+      document.getElementById('mainModal').classList.add('show-modal');
+    }
+
+    async function saveQuizResult(courseName, score, correct, total) {
+      const result = {
+        course: courseName,
+        score: score,
+        correct: correct,
+        total: total,
+        date: new Date().toLocaleDateString()
+      };
+
+      try {
+        const saved = await apiCreateCollectionItem('quizzes', result);
+        if (saved && saved.id) {
+          quizResults.push(saved);
+        } else {
+          quizResults.push(result);
+        }
+      } catch (e) {
+        quizResults.push(result);
+      }
+
+      localStorage.setItem('trackwiseQuizResults', JSON.stringify(quizResults));
+      updateQuizzes();
+    }
+  </script>
+</body>
+</html>
+

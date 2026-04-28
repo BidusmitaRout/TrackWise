@@ -1,0 +1,145 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <link rel='icon' type='image/svg+xml' href='favicon.svg' />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  
+  <div class="nav">
+    <div class="container inner" style="justify-content:space-between">
+      <a class="logo" href="index.html"><span class="mark"></span>TrackWise</a>
+      <div id="right-controls" style="display:flex;gap:12px;align-items:center">
+        <div style="position:relative">
+          <button id="nav-menu-toggle" class="btn" aria-expanded="false" aria-controls="nav-menu">&#9776;</button>
+          <div id="nav-menu" class="user-dropdown-menu" style="display:none;right:0;left:auto;"></div>
+        </div>
+        <button id="mode-toggle-btn" title="Toggle Dark/Light Mode" class="btn">&#9728;</button>
+        <div id="auth-area" style="display:flex;align-items:center;gap:8px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container section fade-in">
+    <h1>&#127942; Leaderboard</h1>
+    <p class="lead">See how you rank among other learners. Compete, learn, grow!</p>
+
+    <div class="kpi">
+      <div class="tile fade-in"><div class="muted">Your Rank</div><div class="val" id="userRank">#1</div></div>
+      <div class="tile fade-in"><div class="muted">Your Score</div><div class="val" id="userScore">0</div></div>
+      <div class="tile fade-in"><div class="muted">Your Streak</div><div class="val" id="userStreak">0🔥</div></div>
+      <div class="tile fade-in"><div class="muted">Percentile</div><div class="val" id="userPercentile">--</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+      <div class="card fade-in">
+        <h3>🔥 Streak Leaderboard</h3>
+        <div id="streakLeaderboard" style="display:grid;gap:8px;margin-top:12px"></div>
+      </div>
+      <div class="card fade-in">
+        <h3>&#9201; Hours Logged Leaderboard</h3>
+        <div id="hoursLeaderboard" style="display:grid;gap:8px;margin-top:12px"></div>
+      </div>
+    </div>
+
+    <div class="card fade-in" style="margin-top:16px">
+      <h3>🎯 Course Completion Leaderboard</h3>
+      <div id="completionLeaderboard" style="display:grid;gap:8px;margin-top:12px"></div>
+    </div>
+  </div>
+
+  <div class="footer fade-in" style="margin-top:40px">
+    <div class="container cols">
+      <div>
+        <div class="logo"><span class="mark"></span>TrackWise</div>
+        <p class="muted">We are here to help you learn, track, and grow.</p>
+      </div>
+    </div>
+    <div class="container" style="margin-top:18px;color:#6b7280">&copy; 2025 TrackWise. All rights reserved.</div>
+  </div>
+
+  <div class="modal-backdrop" id="mainModal" onclick="if(event.target.id === 'mainModal') closeModal()">
+    <div class="card modal-content"></div>
+  </div>
+
+  <script src="theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    const mockLeaders = [
+      { name: 'Aarav Sharma', streak: 45, hours: 120, completed: 8 },
+      { name: 'Saanvi Patel', streak: 38, hours: 105, completed: 7 },
+      { name: 'Rohan Kumar', streak: 32, hours: 95, completed: 6 },
+      { name: 'Priya Singh', streak: 28, hours: 85, completed: 5 },
+      { name: 'Vikram Reddy', streak: 22, hours: 75, completed: 4 }
+    ];
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      await loadCourseData();
+      updateLeaderboards();
+    });
+
+    function updateLeaderboards() {
+      const currentUser = getAuthUser();
+      const userName = currentUser ? currentUser.name : 'You';
+      const userStreak = Math.max(...courseData.map(c => c.streak || 0), 0);
+      const userHours = courseData.reduce((sum, c) => sum + (c.hoursLogged || 0), 0);
+      const userCompleted = courseData.filter(c => c.isCompleted).length;
+
+      // Calculate score (weighted: hours Ã— 2 + streak Ã— 3 + completed Ã— 5)
+      const userScore = Math.round(userHours * 2 + userStreak * 3 + userCompleted * 5);
+
+      document.getElementById('userStreak').textContent = userStreak + '🔥';
+      document.getElementById('userScore').textContent = userScore;
+
+      // Streak Leaderboard
+      const streakLeaders = [...mockLeaders].sort((a, b) => b.streak - a.streak);
+      streakLeaders.unshift({ name: userName + ' (You)', streak: userStreak, hours: userHours, completed: userCompleted });
+      document.getElementById('userRank').textContent = '#' + (streakLeaders.findIndex(l => l.name.includes('You')) + 1);
+
+      document.getElementById('streakLeaderboard').innerHTML = streakLeaders.slice(0, 5).map((leader, i) => `
+        <div style="padding:12px;background:${leader.name.includes('You') ? 'rgba(59, 130, 246, 0.1)' : 'var(--panel-2)'};border-radius:8px;display:flex;justify-content:space-between;align-items:center;border-left:3px solid ${i === 0 ? '#fbbf24' : i === 1 ? '#d1d5db' : i === 2 ? '#cd7f32' : 'var(--border)'}">
+          <div>
+            <div style="font-weight:600">${i + 1}. ${leader.name}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">🔥 ${leader.streak} day streak</div>
+          </div>
+          <div style="font-size:24px">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '•'}</div>
+        </div>
+      `).join('');
+
+      // Hours Leaderboard
+      const hoursLeaders = [...mockLeaders].sort((a, b) => b.hours - a.hours);
+      hoursLeaders.unshift({ name: userName + ' (You)', streak: userStreak, hours: userHours, completed: userCompleted });
+
+      document.getElementById('hoursLeaderboard').innerHTML = hoursLeaders.slice(0, 5).map((leader, i) => `
+        <div style="padding:12px;background:${leader.name.includes('You') ? 'rgba(59, 130, 246, 0.1)' : 'var(--panel-2)'};border-radius:8px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-weight:600">${i + 1}. ${leader.name}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">&#9201; ${leader.hours}h logged</div>
+          </div>
+          <div style="font-size:24px">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '•'}</div>
+        </div>
+      `).join('');
+
+      // Completion Leaderboard
+      const completionLeaders = [...mockLeaders].sort((a, b) => b.completed - a.completed);
+      completionLeaders.unshift({ name: userName + ' (You)', streak: userStreak, hours: userHours, completed: userCompleted });
+
+      document.getElementById('completionLeaderboard').innerHTML = completionLeaders.slice(0, 5).map((leader, i) => `
+        <div style="padding:12px;background:${leader.name.includes('You') ? 'rgba(59, 130, 246, 0.1)' : 'var(--panel-2)'};border-radius:8px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-weight:600">${i + 1}. ${leader.name}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">✅ ${leader.completed} courses completed</div>
+          </div>
+          <div style="font-size:24px">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '•'}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('userPercentile').textContent = Math.round(Math.random() * 95) + '%';
+    }
+  </script>
+</body>
+</html>
+

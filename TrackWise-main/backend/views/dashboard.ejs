@@ -1,0 +1,43 @@
+<h1>
+    Dashboard</h1>
+<div class="meta">Welcome back, <strong><%= user.name || user.email %></strong></div>
+<p>This is your session-based dashboard, rendered with EJS on the backend.</p>
+
+<hr>
+
+<h3>Your Learning Tracks</h3>
+<div class="courses-container">
+    <% if (typeof courses !== 'undefined' && courses.length > 0) { %>
+        <% courses.forEach(course => { %>
+            <div class="course-card" style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 8px;">
+                <h4>
+                    <%= course.name %>
+                </h4>
+                <p>Progress: <strong><%= course.progress %>%</strong></p>
+
+                <% if (course.resources && course.resources.length > 0) { %>
+                    <ul>
+                        <% course.resources.forEach(resource => { %>
+                            <li>
+                                <%= resource.title %>
+                                    <% if (resource.pdfPath) { %>
+                                        <a href="<%= resource.pdfPath %>" target="_blank" style="color: #007bff; margin-left: 10px;">
+                                        [View PDF]
+                                    </a>
+                                        <% } %>
+                            </li>
+                            <% }) %>
+                    </ul>
+                    <% } %>
+            </div>
+            <% }) %>
+                <% } else { %>
+                    <p>No courses found. Start learning today!</p>
+                    <% } %>
+</div>
+
+<hr>
+
+<form action="/logout" method="post">
+    <button type="submit">Logout</button>
+</form>

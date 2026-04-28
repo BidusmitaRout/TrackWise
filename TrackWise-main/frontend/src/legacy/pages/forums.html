@@ -1,0 +1,251 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <link rel='icon' type='image/svg+xml' href='favicon.svg' />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  
+  <div class="nav">
+    <div class="container inner" style="justify-content:space-between">
+      <a class="logo" href="index.html"><span class="mark"></span>TrackWise</a>
+      <div id="right-controls" style="display:flex;gap:12px;align-items:center">
+        <div style="position:relative">
+          <button id="nav-menu-toggle" class="btn" aria-expanded="false" aria-controls="nav-menu">&#9776;</button>
+          <div id="nav-menu" class="user-dropdown-menu" style="display:none;right:0;left:auto;"></div>
+        </div>
+        <button id="mode-toggle-btn" title="Toggle Dark/Light Mode" class="btn">&#9728;</button>
+        <div id="auth-area" style="display:flex;align-items:center;gap:8px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container section fade-in">
+    <h1>💬 Community Forums</h1>
+    <p class="lead">Ask questions, share tips, and help fellow learners.</p>
+
+    <div class="card fade-in" style="margin-top:16px">
+      <h3>Select a Course Discussion</h3>
+      <div id="coursesList" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;margin-top:12px"></div>
+    </div>
+
+    <div class="card fade-in" style="margin-top:16px">
+      <h3 id="forumTitle">💭 Latest Discussions</h3>
+      <input type="text" id="forumSearch" class="input" placeholder="Search discussions..." oninput="filterDiscussions(this.value)" style="margin-bottom:12px" />
+      <div id="discussionsList" style="display:grid;gap:12px;margin-top:12px"></div>
+      
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+        <h4>Start a New Discussion</h4>
+        <input type="text" id="newThreadTitle" class="input" placeholder="Question title..." style="margin-bottom:10px" />
+        <textarea id="newThreadBody" class="input" placeholder="Share your question or tip..." style="height:100px;margin-bottom:10px;resize:vertical"></textarea>
+        <button class="btn brand" onclick="postDiscussion()" style="width:100%">Post Discussion</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer fade-in" style="margin-top:40px">
+    <div class="container cols">
+      <div>
+        <div class="logo"><span class="mark"></span>TrackWise</div>
+        <p class="muted">We are here to help you learn, track, and grow.</p>
+      </div>
+    </div>
+    <div class="container" style="margin-top:18px;color:#6b7280">&copy; 2025 TrackWise. All rights reserved.</div>
+  </div>
+
+  <div class="modal-backdrop" id="mainModal" onclick="if(event.target.id === 'mainModal') closeModal()">
+    <div class="card modal-content"></div>
+  </div>
+
+  <script src="theme.js"></script>
+  <script src="script.js"></script>
+  <script>
+    let discussions = JSON.parse(localStorage.getItem('trackwiseDiscussions') || '[]');
+    let currentCourse = '';
+
+    const defaultDiscussions = [
+      { id: 1, course: 'JavaScript Essentials', title: 'Best practices for async/await', author: 'Alex', replies: 5, views: 128, date: '2 days ago', solved: false },
+      { id: 2, course: 'JavaScript Essentials', title: 'DOM manipulation tips', author: 'Jordan', replies: 3, views: 84, date: '1 day ago', solved: true },
+      { id: 3, course: 'React Basics', title: 'State management patterns', author: 'Casey', replies: 8, views: 256, date: '3 days ago', solved: false },
+      { id: 4, course: 'React Basics', title: 'When to use hooks vs classes', author: 'Morgan', replies: 12, views: 512, date: '5 days ago', solved: true }
+    ];
+
+    if (discussions.length === 0) {
+      discussions = defaultDiscussions;
+      localStorage.setItem('trackwiseDiscussions', JSON.stringify(discussions));
+    }
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      await loadCourseData();
+      await loadForums();
+      updateForums();
+    });
+
+    async function loadForums() {
+      try {
+        const backendDiscussions = await apiGetCollection('forums', { user: getAuthUser()?.email });
+        if (Array.isArray(backendDiscussions) && backendDiscussions.length > 0) {
+          discussions = backendDiscussions;
+          localStorage.setItem('trackwiseDiscussions', JSON.stringify(discussions));
+        }
+      } catch (e) {
+        // fallback to localStorage
+      }
+    }
+
+    function updateForums() {
+      const coursesContainer = document.getElementById('coursesList');
+      const uniqueCourses = [...new Set(courseData.map(c => c.name)), 'General'];
+      
+      coursesContainer.innerHTML = uniqueCourses.map(course => `
+        <div style="padding:12px;background:var(--panel-2);border-radius:8px;cursor:pointer;border:2px solid ${currentCourse === course ? 'var(--brand)' : 'transparent'};transition:all 0.2s" onclick="selectCourse('${course}')">
+          <h4 style="margin:0">${course}</h4>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">${discussions.filter(d => d.course === course).length} discussions</div>
+        </div>
+      `).join('');
+
+      if (!currentCourse && courseData.length > 0) {
+        currentCourse = courseData[0].name;
+      }
+
+      displayDiscussions();
+    }
+
+    function selectCourse(course) {
+      currentCourse = course;
+      updateForums();
+    }
+
+    function displayDiscussions() {
+      const filtered = currentCourse ? discussions.filter(d => d.course === currentCourse) : discussions;
+      const container = document.getElementById('discussionsList');
+      document.getElementById('forumTitle').textContent = currentCourse ? `💭 ${currentCourse} Discussions` : '💭 All Discussions';
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<p class="muted" style="text-align:center">No discussions yet. Start one!</p>';
+      } else {
+        container.innerHTML = filtered.map(disc => `
+          <div style="padding:12px;background:var(--panel-2);border-radius:8px;border-left:3px solid ${disc.solved ? 'var(--ok)' : 'var(--brand)'};cursor:pointer" onclick="viewDiscussion(${disc.id})">
+            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
+              <div style="flex:1">
+                <div style="font-weight:600;display:flex;gap:8px;align-items:center">
+                  ${disc.solved ? '✅' : '❓'} ${disc.title}
+                </div>
+                <div style="font-size:12px;color:var(--muted);margin-top:4px">by ${disc.author} • ${disc.date}</div>
+              </div>
+              <div style="text-align:right;font-size:12px">
+                <div style="color:var(--muted)">${disc.replies} replies</div>
+                <div style="color:var(--muted)">${disc.views} views</div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function filterDiscussions(searchTerm) {
+      const filtered = discussions.filter(d => 
+        (!currentCourse || d.course === currentCourse) &&
+        (d.title.toLowerCase().includes(searchTerm.toLowerCase()) || d.author.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+
+      const container = document.getElementById('discussionsList');
+      if (filtered.length === 0) {
+        container.innerHTML = '<p class="muted" style="text-align:center">No discussions found</p>';
+      } else {
+        container.innerHTML = filtered.map(disc => `
+          <div style="padding:12px;background:var(--panel-2);border-radius:8px;border-left:3px solid ${disc.solved ? 'var(--ok)' : 'var(--brand)'};cursor:pointer" onclick="viewDiscussion(${disc.id})">
+            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
+              <div style="flex:1">
+                <div style="font-weight:600;display:flex;gap:8px;align-items:center">
+                  ${disc.solved ? '✅' : '❓'} ${disc.title}
+                </div>
+                <div style="font-size:12px;color:var(--muted);margin-top:4px">by ${disc.author} • ${disc.date}</div>
+              </div>
+              <div style="text-align:right;font-size:12px">
+                <div style="color:var(--muted)">${disc.replies} replies</div>
+                <div style="color:var(--muted)">${disc.views} views</div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function viewDiscussion(id) {
+      const disc = discussions.find(d => d.id === id);
+      if (!disc) return;
+      
+      const modal = document.querySelector('#mainModal .modal-content');
+      modal.innerHTML = `
+        <h2 style="margin-top:0">${disc.title}</h2>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:16px">
+          by ${disc.author} • ${disc.date} • ${disc.views} views • ${disc.replies} replies
+          ${disc.solved ? '• ✅ Solved' : ''}
+        </div>
+        
+        <div style="padding:12px;background:var(--panel-2);border-radius:6px;margin-bottom:16px">
+          <p>This is a sample discussion. ${disc.replies} people have replied with helpful solutions.</p>
+        </div>
+
+        <button class="btn brand" onclick="replyDiscussion(${id})" style="width:100%;margin-bottom:10px">Reply</button>
+        <button class="btn" onclick="closeModal()">Close</button>
+      `;
+      
+      document.getElementById('mainModal').classList.add('show-modal');
+    }
+
+    function replyDiscussion(id) {
+      alert('Reply functionality coming soon! You can already post new discussions.');
+    }
+
+    async function postDiscussion() {
+      const title = document.getElementById('newThreadTitle').value.trim();
+      const body = document.getElementById('newThreadBody').value.trim();
+      const user = getAuthUser();
+
+      if (!title || !body) {
+        alert('Please fill in both fields');
+        return;
+      }
+
+      if (!currentCourse) {
+        alert('Please select a course first');
+        return;
+      }
+
+      const newDisc = {
+        course: currentCourse,
+        title: title,
+        author: user ? user.name : 'Anonymous',
+        replies: 0,
+        views: 1,
+        date: new Date().toLocaleString(),
+        solved: false
+      };
+
+      try {
+        const saved = await apiCreateCollectionItem('forums', newDisc);
+        if (saved && saved.id) {
+          discussions.unshift(saved);
+        } else {
+          discussions.unshift({ id: Math.max(...discussions.map(d => d.id), 0) + 1, ...newDisc });
+        }
+      } catch (e) {
+        discussions.unshift({ id: Math.max(...discussions.map(d => d.id), 0) + 1, ...newDisc });
+      }
+
+      localStorage.setItem('trackwiseDiscussions', JSON.stringify(discussions));
+      
+      document.getElementById('newThreadTitle').value = '';
+      document.getElementById('newThreadBody').value = '';
+      displayDiscussions();
+      alert('Discussion posted successfully!');
+    }
+  </script>
+</body>
+</html>
+

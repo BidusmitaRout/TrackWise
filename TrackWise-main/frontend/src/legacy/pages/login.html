@@ -1,0 +1,47 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <link rel='icon' type='image/svg+xml' href='favicon.svg' />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="nav">
+    <div class="container inner">
+      <a class="logo" href="index.html">
+        <span class="mark"></span>
+        TrackWise
+      </a>
+      <div class="links">
+        <a class="link" href="index.html">Home</a>
+        <a class="link" href="signup.html">Sign up</a>
+        <button id="mode-toggle-btn" title="Toggle Dark/Light Mode">&#9728;</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container section">
+    <div class="card" style="max-width:420px;margin-inline:auto">
+      <h2>Login to TrackWise</h2>
+      <form id="loginForm" onsubmit="loginSubmit(event)" class="form">
+        <input class="input" type="email" name="email" placeholder="Email" required />
+        <input class="input" type="text" name="password" placeholder="Password (demo)" required />
+        <button class="btn brand" type="submit" style="width:100%;margin-top:12px">Login</button>
+      </form>
+      <div style="margin-top:20px;text-align:center;padding:16px;background:var(--panel);border-radius:12px">
+        <p class="muted">Don't have an account?</p>
+        <a class="btn brand" href="signup.html" style="display:inline-block;margin-top:8px">Create a new account</a>
+      </div>
+      <div style="margin-top:16px;padding:12px;background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.3);border-radius:8px">
+        <p class="muted" style="font-size:12px;margin:0">🔒 Note: This is a local demo app running on HTTP (not HTTPS). Chrome shows a password warning because passwords over HTTP are not encrypted in transit. In production, always use HTTPS with SSL/TLS certificates to encrypt passwords. Your account stays logged in via localStorage - just refresh or come back to the site to stay connected!</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="theme.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
+
